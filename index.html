@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <title>Mi Mapa GPS</title>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+var map = L.map('map').setView([-14.0678, -75.7286], 13);
+
+L.tileLayer(
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+    maxZoom: 19
+}).addTo(map);
+
+var marcadorUsuario;
+
+navigator.geolocation.watchPosition(
+
+    function(posicion)
+    {
+        var lat = posicion.coords.latitude;
+        var lon = posicion.coords.longitude;
+
+        console.log("Latitud:", lat);
+        console.log("Longitud:", lon);
+
+        if (!marcadorUsuario)
+        {
+            marcadorUsuario = L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup("Estoy aquí");
+        }
+        else
+        {
+            marcadorUsuario.setLatLng([lat, lon]);
+        }
+
+        map.setView([lat, lon]);
+    },
+
+    function(error)
+    {
+        console.log(error);
+    },
+
+    {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000
+    }
+
+);
+
+</script>
+
+</body>
+</html>
