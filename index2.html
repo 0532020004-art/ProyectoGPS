@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <title>Mi Mapa GPS</title>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="info"
+     style="
+     position:absolute;
+     top:100px;
+     left:100px;
+     z-index:1000;
+     background:white;
+     padding:10px;
+     border:1px solid black;
+     border-radius:5px;
+     font-family:Arial;
+     font-size:14px;">
+     Esperando GPS...
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+var map = L.map('map').setView([-14.0678, -75.7286], 13);
+
+L.tileLayer(
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+    maxZoom: 19
+}).addTo(map);
+
+var marcadorUsuario;
+
+navigator.geolocation.watchPosition(
+
+    function(posicion)
+    {
+        var lat = posicion.coords.latitude;
+        var lon = posicion.coords.longitude;
+        var precision = posicion.coords.accuracy;
+        var velocidad = posicion.coords.speed || 0;
+
+        // Ignorar lecturas malas
+        if (precision > 20)
+        {
+            document.getElementById("info").innerHTML =
+            "GPS detectado<br>" +
+            "Precisión insuficiente: " +
+            Math.round(precision) +
+            " m";
+
+            return;
+        }
+
+        // Actualizar caja de información
+       document.getElementById("info").innerHTML =
+        "<b>Mi Posición</b><br>" +
+        "Lat: " + lat.toFixed(6) + "<br>" +
+        "Lon: " + lon.toFixed(6) + "<br>" +
+        "Precisión: " + Math.round(precision) + " m<br>" +
+        "Velocidad: " + velocidad.toFixed(2) + " m/s";
+
+        // Crear marcador la primera vez
+        if (!marcadorUsuario)
+        {
+            marcadorUsuario = L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup("Estoy aquí");
+        }
+        else
+        {
+            marcadorUsuario.setLatLng([lat, lon]);
+        }
+
+        map.setView([lat, lon]);
+    },
+
+    function(error)
+    {
+        document.getElementById("info").innerHTML =
+        "Error GPS";
+    },
+
+    {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000
+    }
+
+);
+</script>
+
+</body>
+</html>
